@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8"/>
+    <title>Wikipedia</title>
+    <link href="https://fonts.googleapis.com/css?family=Merriweather:300,700" rel="stylesheet">
+    <style>
+      .infobox,
+      .metadata,
+      .thumb,
+      .reference,
+      .hatnote,
+      .noprint,
+      .sistersitebox,
+      .floatright {
+        display: none;
+      }
+
+      .mw-parser-output {
+        width: 600px;
+        margin-left: auto;
+        margin-right: auto;
+        margin-bottom: 10em;
+        font-family: 'Merriweather', serif;
+        font-size: 20px;
+        line-height: 1.8em;
+      }
+
+      h1 {
+        margin-top: 3em;
+        margin-bottom: 1.5em;
+      }
+
+      a {
+        color: black;
+        text-decoration: none;
+        pointer-events: none;
+        cursor: default;
+      }
+
+      p, li {
+        font-weight: 300;
+      }
+
+      blockquote {
+        border-left: 2px solid #AAA;
+        padding-left: 1.5em;
+        margin-left: 0;
+      }
+    </style>
+  </head>
+  <body>
+    <script type="text/javascript">
+      function removeAllAfter (query) {
+        const child = document.querySelector(query)
+
+        if (!child) {
+          return
+        }
+
+        const element = child.parentElement
+        while (element.nextElementSibling) {
+          element.nextElementSibling.remove()
+        }
+        element.remove()
+      }
+
+      function fetchArticle (page) {
+        const url = `https://en.wikipedia.org/w/api.php?action=parse&page=${page}&format=json&origin=*&prop=text&disabletoc=true&disableeditsection=true`
+
+        fetch(url)
+          .then(response => response.json())
+          .then((data) => {
+            document.body.innerHTML = data.parse.text['*']
+            const output = document.querySelector('.mw-parser-output')
+            const title = document.createElement('h1')
+            title.innerText = data.parse.title
+            output.prepend(title)
+
+            removeAllAfter('#See_also')
+            removeAllAfter('#References')
+          })
+          .catch(console.log)
+      }
+
+      function loadPage () {
+        const page = window.location.hash.substring(1)
+
+        if (page === '') {
+          const input = window.prompt('What\'s the article title?')
+          window.location.hash = input
+        } else {
+          fetchArticle(page)
+        }
+      }
+
+      window.onhashchange = loadPage
+      window.onload = loadPage
+    </script>
+  </body>
+</html>
